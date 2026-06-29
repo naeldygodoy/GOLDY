@@ -221,15 +221,16 @@ delta_t_ambiente = 43 - temp_interna_alvo
 carga_termica_estimada = (area_superficial * (coef_condutividade / espessura_teto) * delta_t_ambiente * 24 / 16) * 1.45
 
 qtd_maquinas = 1
-modelo_condensadora = "Não localizado"
-modelo_evaporador = "Não localizado"
+modelo_condensadora_sugerida = "Não localizado"
+modelo_evaporador_sugerido = "Não localizado"
 kcal_unitario_cond = 0
 kcal_unitario_evap = 0
 
 usa_gsmi = alt_ext <= 4.0 and "Sorvetes" not in temp_desejada
 
+# Carregamento dos Catálogos Técnicos
 if "Resfriados" in temp_desejada:
-    catalogo_danfoss_resf = [
+    catalogo_danfoss = [
         {"modelo": "OP-HJM019", "kcal": 1631}, {"modelo": "OP-HJM022", "kcal": 2263},
         {"modelo": "OP-HJM028", "kcal": 3581}, {"modelo": "OP-HJM032", "kcal": 3748},
         {"modelo": "OP-HJM036", "kcal": 4438}, {"modelo": "OP-HJM040", "kcal": 5096},
@@ -240,7 +241,7 @@ if "Resfriados" in temp_desejada:
         {"modelo": "OP-HGM144", "kcal": 15980}, {"modelo": "OP-HGM160", "kcal": 17500}
     ]
     if usa_gsmi:
-        catalogo_mipal_resf = [
+        catalogo_mipal = [
             {"modelo": "GSMI13", "kcal": 1107}, {"modelo": "GSMI15", "kcal": 1387},
             {"modelo": "GSMI18", "kcal": 1579}, {"modelo": "GSMI25", "kcal": 2213},
             {"modelo": "GSMI31", "kcal": 2710}, {"modelo": "GSMI38", "kcal": 3318},
@@ -250,38 +251,16 @@ if "Resfriados" in temp_desejada:
             {"modelo": "GSMI125", "kcal": 10860}
         ]
     else:
-        catalogo_mipal_resf = [
+        catalogo_mipal = [
             {"modelo": "HDL31", "kcal": 2977}, {"modelo": "HDL38", "kcal": 3572},
             {"modelo": "HDL48", "kcal": 4584}, {"modelo": "HDL58", "kcal": 5501},
             {"modelo": "HDL64", "kcal": 6132}, {"modelo": "HDL77", "kcal": 7358},
             {"modelo": "HDL86", "kcal": 8156}, {"modelo": "HDL103", "kcal": 9787},
             {"modelo": "HDL129", "kcal": 12323}, {"modelo": "HDL155", "kcal": 14788},
-            {"modelo": "HDL198", "kcal": 18871}, {"modelo": "HDL238", "kcal": 22646}
+            {"modelo": "HDL198", "running_kcal": 18871, "kcal": 18871}, {"modelo": "HDL238", "kcal": 22646}
         ]
-
-    for cond in catalogo_danfoss_resf:
-        if cond["kcal"] >= carga_termica_estimada:
-            modelo_condensadora = cond["modelo"]
-            kcal_unitario_cond = cond["kcal"]
-            break
-            
-    if kcal_unitario_cond == 0:
-        qtd_maquinas = 2
-        carga_fracionada = carga_termica_estimada / 2
-        for cond in catalogo_danfoss_resf:
-            if cond["kcal"] >= carga_fracionada:
-                modelo_condensadora = cond["modelo"]
-                kcal_unitario_cond = cond["kcal"]
-                break
-
-    carga_por_evap = carga_termica_estimada / qtd_maquinas
-    for evap in catalogo_mipal_resf:
-        if evap["kcal"] >= carga_por_evap:
-            modelo_evaporador = evap["modelo"]
-            kcal_unitario_evap = evap["kcal"]
-            break
 else:
-    catalogo_danfoss_cong = [
+    catalogo_danfoss = [
         {"modelo": "OP-HJZ019", "kcal": 1141}, {"modelo": "OP-HJZ022", "kcal": 1333},
         {"modelo": "OP-HJZ028", "kcal": 2113}, {"modelo": "OP-HJZ032", "kcal": 2569},
         {"modelo": "OP-HJZ044", "kcal": 2659}, {"modelo": "OP-HJZ048", "kcal": 3317},
@@ -291,7 +270,7 @@ else:
         {"modelo": "OP-HJZ144", "kcal": 9648}, {"modelo": "OP-HJZ171", "kcal": 10660}
     ]
     if usa_gsmi:
-        catalogo_mipal_cong = [
+        catalogo_mipal = [
             {"modelo": "GSMI13", "kcal": 1015}, {"modelo": "GSMI15", "kcal": 1272},
             {"modelo": "GSMI18", "kcal": 1448}, {"modelo": "GSMI25", "kcal": 2029},
             {"modelo": "GSMI31", "kcal": 2485}, {"modelo": "GSMI38", "kcal": 3042},
@@ -301,7 +280,7 @@ else:
             {"modelo": "GSMI125", "kcal": 9958}
         ]
     else:
-        catalogo_mipal_cong = [
+        catalogo_mipal = [
             {"modelo": "HDL31", "kcal": 2375}, {"modelo": "HDL38", "kcal": 2849},
             {"modelo": "HDL48", "kcal": 3657}, {"modelo": "HDL58", "kcal": 4388},
             {"modelo": "HDL64", "kcal": 4892}, {"modelo": "HDL77", "kcal": 5870},
@@ -310,72 +289,29 @@ else:
             {"modelo": "HDL198", "kcal": 15054}, {"modelo": "HDL238", "kcal": 18065}
         ]
 
-    for cond in catalogo_danfoss_cong:
-        if cond["kcal"] >= carga_termica_estimada:
-            modelo_condensadora = cond["modelo"]
+# 1. Sugestão Inicial Automática da Condensadora baseada na Carga Térmica
+for cond in catalogo_danfoss:
+    if cond["kcal"] >= carga_termica_estimada:
+        modelo_condensadora_sugerida = cond["modelo"]
+        kcal_unitario_cond = cond["kcal"]
+        break
+        
+if kcal_unitario_cond == 0:
+    qtd_maquinas = 2
+    carga_fracionada = carga_termica_estimada / 2
+    for cond in catalogo_danfoss:
+        if cond["kcal"] >= carga_fracionada:
+            modelo_condensadora_sugerida = cond["modelo"]
             kcal_unitario_cond = cond["kcal"]
             break
-            
-    if kcal_unitario_cond == 0:
-        qtd_maquinas = 2
-        carga_fracionada = carga_termica_estimada / 2
-        for cond in catalogo_danfoss_cong:
-            if cond["kcal"] >= carga_fracionada:
-                modelo_condensadora = cond["modelo"]
-                kcal_unitario_cond = cond["kcal"]
-                break
 
-    carga_por_evap = carga_termica_estimada / qtd_maquinas
-    for evap in catalogo_mipal_cong:
-        if evap["kcal"] >= carga_por_evap:
-            modelo_evaporador = evap["modelo"]
-            kcal_unitario_evap = evap["kcal"]
-            break
-
-# ================= ENGENHARIA DE DIÂMETRO DE TUBULAÇÕES =================
-carga_por_conjunto = carga_termica_estimada / qtd_maquinas
-bitola_succao = "1 1/8"
-bitola_descarga = "1/2"
-
-if "Resfriados" in temp_desejada:
-    matriz_tubos = [
-        (252, "3/8", "3/8"), (756, "1/2", "3/8"), (1008, "1/2", "3/8"), (1512, "5/8", "3/8"),
-        (2268, "5/8", "3/8"), (3024, "7/8", "3/8"), (3780, "7/8", "3/8"), (4536, "7/8", "3/8"),
-        (6048, "7/8", "3/8"), (7560, "1 1/8", "3/8"), (9072, "1 1/8", "1/2"), (10584, "1 1/8", "1/2"),
-        (12096, "1 1/8", "1/2"), (13608, "1 3/8", "1/2"), (15120, "1 3/8", "1/2"), (16632, "1 3/8", "1/2"),
-        (18144, "1 3/8", "1/2"), (19656, "1 3/8", "5/8"), (21168, "1 3/8", "5/8"), (22680, "1 3/8", "5/8"),
-        (30240, "1 5/8", "7/8"), (37800, "1 5/8", "7/8"), (45360, "2 1/8", "7/8"), (52920, "2 1/8", "7/8"),
-        (60480, "2 1/8", "7/8"), (75600, "2 1/8", "7/8"), (90720, "2 5/8", "7/8"), (120960, "2 5/8", "1 1/8"),
-        (161200, "2 5/8", "1 1/8")
-    ]
-else:
-    matriz_tubos = [
-        (250, "3/8", "3/8"), (750, "1/2", "3/8"), (1000, "5/8", "3/8"), (1500, "5/8", "3/8"),
-        (2250, "7/8", "3/8"), (3000, "7/8", "3/8"), (3750, "7/8", "3/8"), (4500, "7/8", "3/8"),
-        (6000, "1 1/8", "3/8"), (7500, "1 1/8", "1/2"), (9000, "1 1/8", "1/2"), (10500, "1 3/8", "1/2"),
-        (12000, "1 3/8", "1/2"), (13500, "1 3/8", "1/2"), (15000, "1 3/8", "1/2"), (16500, "1 5/8", "1/2"),
-        (18000, "1 5/8", "1/2"), (19500, "1 5/8", "5/8"), (21000, "1 5/8", "5/8"), (22500, "1 5/8", "5/8"),
-        (30000, "2 1/8", "5/8"), (37500, "2 1/8", "5/8"), (45000, "2 1/8", "7/8"), (52500, "2 1/8", "7/8"),
-        (60000, "2 5/8", "7/8"), (75000, "2 5/8", "7/8"), (90000, "2 5/8", "7/8"), (120000, "3 1/8", "1 1/8"),
-        (150000, "3 1/8", "1 1/8")
-    ]
-
-for limite_cap, suc, desc in matriz_tubos:
-    if carga_por_conjunto <= limite_cap:
-        bitola_succao = suc
-        bitola_descarga = desc
+# 2. Sugestão Inicial Automática do Evaporador
+carga_por_evap = carga_termica_estimada / qtd_maquinas
+for evap in catalogo_mipal:
+    if evap["kcal"] >= carga_por_evap:
+        modelo_evaporador_sugerido = evap["modelo"]
+        kcal_unitario_evap = evap["kcal"]
         break
-
-# ================= REGRAS DE CÁLCULO DE PORCAS =================
-qtd_porca_38 = 1 * qtd_maquinas
-if bitola_descarga == "3/8":
-    qtd_porca_38 += 2 * qtd_maquinas
-
-qtd_porca_12 = 1 * qtd_maquinas
-if bitola_descarga == "1/2":
-    qtd_porca_12 += 2 * qtd_maquinas
-
-qtd_porca_58 = (2 * qtd_maquinas) + (1 * qtd_maquinas)
 
 # ================= EXIBIÇÃO DOS RESULTADOS =================
 with col_direita:
@@ -388,6 +324,87 @@ with col_direita:
     ⚖️ **Previsão de Estocagem:** {texto_estocagem}
     """)
     
+    st.markdown("---")
+    
+    # ------------------ SEÇÃO INTERATIVA: DROPDOWNS DE SELEÇÃO DE MÁQUINAS ------------------
+    st.markdown("### 🔄 Seleção de Equipamentos (Flexibilidade de Projeto)")
+    st.markdown("Altere os modelos abaixo se desejar sobredimensionar ou reduzir os equipamentos por particularidades da obra:")
+    
+    col_drop1, col_drop2 = st.columns(2)
+    
+    # Extração de listas puras de modelos para os dropdowns
+    lista_opcoes_cond = [c["modelo"] for c in catalogo_danfoss]
+    lista_opcoes_evap = [e["modelo"] for e in catalogo_mipal]
+    
+    # Índices padrões baseados no cálculo automático anterior
+    try: idx_padrao_cond = lista_opcoes_cond.index(modelo_condensadora_sugerida)
+    except ValueError: idx_padrao_cond = 0
+        
+    try: idx_padrao_evap = lista_opcoes_evap.index(modelo_evaporador_sugerido)
+    except ValueError: idx_padrao_evap = 0
+
+    with col_drop1:
+        modelo_condensadora = st.selectbox("Unidade Condensadora:", options=lista_opcoes_cond, index=idx_padrao_cond)
+    with col_drop2:
+        modelo_evaporador = st.selectbox("Evaporador de Forçador:", options=lista_opcoes_evap, index=idx_padrao_evap)
+        
+    # Atualiza as capacidades de projeto em tempo real com base no que o usuário selecionou
+    for cond in catalogo_danfoss:
+        if cond["modelo"] == modelo_condensadora:
+            kcal_unitario_cond = cond["kcal"]
+            break
+            
+    for evap in catalogo_mipal:
+        if evap["modelo"] == modelo_evaporador:
+            kcal_unitario_evap = evap["kcal"]
+            break
+
+    # ================= ENGENHARIA DINÂMICA DE TUBULAÇÕES COM BASE NA MÁQUINA SELECIONADA =================
+    # A capacidade da máquina escolhida passa a comandar o diâmetro das tubulações
+    carga_por_conjunto = kcal_unitario_cond 
+    bitola_succao = "1 1/8"
+    bitola_descarga = "1/2"
+
+    if "Resfriados" in temp_desejada:
+        matriz_tubos = [
+            (252, "3/8", "3/8"), (756, "1/2", "3/8"), (1008, "1/2", "3/8"), (1512, "5/8", "3/8"),
+            (2268, "5/8", "3/8"), (3024, "7/8", "3/8"), (3780, "7/8", "3/8"), (4536, "7/8", "3/8"),
+            (6048, "7/8", "3/8"), (7560, "1 1/8", "3/8"), (9072, "1 1/8", "1/2"), (10584, "1 1/8", "1/2"),
+            (12096, "1 1/8", "1/2"), (13608, "1 3/8", "1/2"), (15120, "1 3/8", "1/2"), (16632, "1 3/8", "1/2"),
+            (18144, "1 3/8", "1/2"), (19656, "1 3/8", "5/8"), (21168, "1 3/8", "5/8"), (22680, "1 3/8", "5/8"),
+            (30240, "1 5/8", "7/8"), (37800, "1 5/8", "7/8"), (45360, "2 1/8", "7/8"), (52920, "2 1/8", "7/8"),
+            (60480, "2 1/8", "7/8"), (75600, "2 1/8", "7/8"), (90720, "2 5/8", "7/8"), (120960, "2 5/8", "1 1/8"),
+            (161200, "2 5/8", "1 1/8")
+        ]
+    else:
+        matriz_tubos = [
+            (250, "3/8", "3/8"), (750, "1/2", "3/8"), (1000, "5/8", "3/8"), (1500, "5/8", "3/8"),
+            (2250, "7/8", "3/8"), (3000, "7/8", "3/8"), (3750, "7/8", "3/8"), (4500, "7/8", "3/8"),
+            (6000, "1 1/8", "3/8"), (7500, "1 1/8", "1/2"), (9000, "1 1/8", "1/2"), (10500, "1 3/8", "1/2"),
+            (12000, "1 3/8", "1/2"), (13500, "1 3/8", "1/2"), (15000, "1 3/8", "1/2"), (16500, "1 5/8", "1/2"),
+            (18000, "1 5/8", "1/2"), (19500, "1 5/8", "5/8"), (21000, "1 5/8", "5/8"), (22500, "1 5/8", "5/8"),
+            (30000, "2 1/8", "5/8"), (37500, "2 1/8", "5/8"), (45000, "2 1/8", "7/8"), (52500, "2 1/8", "7/8"),
+            (60000, "2 5/8", "7/8"), (75000, "2 5/8", "7/8"), (90000, "2 5/8", "7/8"), (120000, "3 1/8", "1 1/8"),
+            (150000, "3 1/8", "1 1/8")
+        ]
+
+    for limite_cap, suc, desc in matriz_tubos:
+        if carga_por_conjunto <= limite_cap:
+            bitola_succao = suc
+            bitola_descarga = desc
+            break
+
+    # ================= REGRAS DE CÁLCULO DE PORCAS DE ACORDO COM A ALTERAÇÃO DA MÁQUINA =================
+    qtd_porca_38 = 1 * qtd_maquinas
+    if bitola_descarga == "3/8":
+        qtd_porca_38 += 2 * qtd_maquinas
+
+    qtd_porca_12 = 1 * qtd_maquinas
+    if bitola_descarga == "1/2":
+        qtd_porca_12 += 2 * qtd_maquinas
+
+    qtd_porca_58 = (2 * qtd_maquinas) + (1 * qtd_maquinas)
+
     st.markdown("---")
     
     # ------------------ CONSOLIDAÇÃO DOS DADOS (TABELA COMERCIAL) ------------------
@@ -423,6 +440,7 @@ with col_direita:
     if qtd_valvulas > 0:
         lista_consolidada_relatorio.append({"Quantidade": f"{qtd_valvulas} pçs", "Descrição do Item": "Válvula de compensação - Alívio de Pressão"})
         
+    # Itens dos equipamentos que agora mudam de acordo com a seleção nos Dropdowns
     lista_consolidada_relatorio.append({"Quantidade": f"{qtd_maquinas} x {modelo_condensadora}", "Descrição do Item": f"Unidade Condensadora Danfoss - Rendimento Ind: {kcal_unitario_cond} Kcal/h | Fluido: {tipo_gas}"})
     lista_consolidada_relatorio.append({"Quantidade": f"{qtd_maquinas} x {modelo_evaporador}", "Descrição do Item": f"Evaporador Mipal - Rendimento Ind: {kcal_unitario_evap} Kcal/h"})
 
@@ -444,7 +462,7 @@ with col_direita:
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Visor de Líquido - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Filtro Secador - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": f"Válvula Solenoide de Líquido - Rosca na bitola {bitola_descarga}\""},
-        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compatível com quadro"},
+        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compartível com quadro"},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Sucção - Bitola {bitola_succao}\""},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Descarga - Bitola {bitola_descarga}\""},
         {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Luva de Cobre - Sucção - Bitola " + bitola_succao + "\""},
