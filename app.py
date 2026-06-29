@@ -376,8 +376,6 @@ qtd_porca_58 = (2 * qtd_maquinas) + (1 * qtd_maquinas)
 
 # ================= EXIBIÇÃO DOS RESULTADOS =================
 with col_direita:
-    # Divisor HTML adicionado para demarcar o início estrito da impressão comercial
-    st.markdown("<div class='no-print'>", unsafe_allow_html=True)
     st.header("2. Relatório Técnico de Materiais")
     
     st.info(f"""
@@ -386,10 +384,10 @@ with col_direita:
     ⚡ **Carga Térmica de Projeto (Ambiente Ext: 43°C):** {carga_termica_estimada:.0f} Kcal/h  
     ⚖️ **Previsão de Estocagem:** {texto_estocagem}
     """)
-    st.markdown("---")
-    st.markdown("</div>", unsafe_allow_html=True)
     
-    # ------------------ CONSOLIDAÇÃO DOS DADOS ------------------
+    st.markdown("---")
+    
+    # ------------------ CONSOLIDAÇÃO DOS DADOS (TABELA COMERCIAL) ------------------
     lista_consolidada_relatorio = []
     
     lista_consolidada_relatorio.append({"Quantidade": f"{total_paineis_parede} pçs", "Descrição do Item": f"Painéis de Parede - Espessura {espessura_teto:.2f}m | Altura {alt_painel:.2f}m"})
@@ -443,11 +441,11 @@ with col_direita:
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Visor de Líquido - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Filtro Secador - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": f"Válvula Solenoide de Líquido - Rosca na bitola {bitola_descarga}\""},
-        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compatível com quadro"},
+        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compartível com quadro"},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Sucção - Bitola {bitola_succao}\""},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Descarga - Bitola {bitola_descarga}\""},
-        {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": f"Luva de Cobre - Sucção - Bitola {bitola_succao}\""},
-        {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": f"Luva de Cobre - Descarga - Bitola {bitola_descarga}\""},
+        {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Luva de Cobre - Sucção - Bitola " + bitola_succao + "\""},
+        {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Luva de Cobre - Descarga - Bitola " + bitola_descarga + "\""},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": f"Sifão de Cobre - Saída do Evaporador | Bitola {bitola_succao}\""},
         {"Quantidade": f"{(10 * qtd_maquinas)} rolos", "Descrição do Item": "Fita Plástica PVC (Branca) - Proteção do isolamento"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Quadro de Comando Elétrico - Controlador digital integrado"},
@@ -465,74 +463,110 @@ with col_direita:
         {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Carga de Gás MAP - Cilindro descartável p/ maçarico"}
     ])
 
-    st.markdown("### 📊 Listagem Unificada de Materiais e Insumos")
-    st.table(lista_consolidada_relatorio)
-
-    # ------------------ SISTEMA DE IMPRESSÃO CIRÚRGICO (APENAS LISTAGEM) ------------------
-    st.markdown("<div class='no-print'>---", unsafe_allow_html=True)
-    st.markdown("### 🖨️ Exportar Orçamento")
-
-    # Injeção de CSS focada estritamente em ocultar as colunas técnicas e manter apenas o título da listagem e a tabela de dados comerciais
+    # ------------------ SISTEMA DE IMPRESSÃO INFALÍVEL (MÁXIMA ISOLAÇÃO) ------------------
     st.markdown("""
         <style>
+        /* Estilos normais da aplicação */
+        .print-only-header {
+            display: none;
+            font-family: sans-serif;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        /* Regras de Impressão Absolutas */
         @media print {
-            /* Ocultar barra lateral, cabeçalho do Streamlit e o rodapé padrão */
-            div[data-testid="stSidebar"], 
-            div[data-testid="stHeader"], 
-            footer, 
-            header,
-            .stButton,
-            .no-print,
-            div.print-instruction { 
-                display: none !important; 
-            }
-            
-            /* Ocultar totalmente a coluna de inserção de dados da esquerda */
-            div[data-testid="column"]:nth-of-type(1) {
+            /* Ocultar absolutamente toda a raiz estrutural padrão do Streamlit */
+            html, body, .stApp, [data-testid="stAppViewContainer"], 
+            [data-testid="stMain"], [data-testid="stMainSpaceBlockContainer"],
+            [data-testid="stSidebar"], [data-testid="stHeader"], footer, header,
+            .stButton, .stInfo, div.print-instruction, hr {
                 display: none !important;
+                background: transparent !important;
             }
             
-            /* Forçar a coluna do relatório comercial da direita a assumir 100% da largura da folha A4 */
-            div[data-testid="column"]:nth-of-type(2) {
+            /* Selecionar e isolar apenas o container que envelopa a tabela de impressão */
+            .printable-area {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
                 width: 100% !important;
-                flex: 1 1 100% !important;
-                max-width: 100% !important;
+                z-index: 9999999 !important;
+                background: white !important;
+                padding: 0cm !important;
             }
             
-            /* Ajustar as margens do corpo para aproveitar os cantos da folha */
-            .main .block-container { 
-                padding: 0.5rem !important; 
-                max-width: 100% !important; 
+            /* Garantir que o cabeçalho de impressão seja exibido */
+            .print-only-header {
+                display: block !important;
+                margin-bottom: 25px !important;
             }
             
-            /* Remove os blocos do botão html e iframes residuais */
-            iframe { 
-                display: none !important; 
+            .print-only-header h2 {
+                display: block !important;
+                font-size: 22px !important;
+                color: #000 !important;
+                font-weight: bold !important;
+                text-align: center !important;
+            }
+
+            /* Forçar a tabela html interna a ocupar 100% da largura útil da página A4 */
+            .printable-area table {
+                width: 100% !important;
+                font-size: 11px !important;
+                border-collapse: collapse !important;
+                background: white !important;
+            }
+            
+            .printable-area th, .printable-area td {
+                padding: 5px 8px !important;
+                border: 1px solid #333 !important;
+                color: #000 !important;
+            }
+            
+            .printable-area th {
+                background-color: #f2f2f2 !important;
+                font-weight: bold !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
         }
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='print-instruction'><p>Gere o PDF com foco estrito apenas na listagem e tabela:</p></div>", unsafe_allow_html=True)
+    st.markdown("---")
+    st.markdown("### 🖨️ Exportar Orçamento")
+    st.markdown("<div class='print-instruction'><p>Clique no botão abaixo. O sistema agora isola estritamente a listagem para garantir que os campos de entrada e textos explicativos fiquem de fora do papel/PDF:</p></div>", unsafe_allow_html=True)
     
+    # Botão de gatilho com JavaScript atualizado
     st.components.v1.html("""
         <style>
         .print-btn {
-            background-color: #007bff;
+            background-color: #28a745;
             color: white !important;
-            padding: 12px 24px;
+            padding: 14px 28px;
             text-align: center;
             font-size: 16px;
             cursor: pointer;
-            border-radius: 8px;
+            border-radius: 6px;
             border: none;
             font-weight: bold;
             width: 100%;
             font-family: sans-serif;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
         }
-        .print-btn:hover { background-color: #0056b3; }
+        .print-btn:hover { background-color: #218838; }
         </style>
-        <button class="print-btn" onclick="window.parent.print()">🖨️ Imprimir Apenas Listagem de Insumos</button>
+        <button class="print-btn" onclick="window.parent.print()">🖨️ Gerar Listagem Unificada Ajustada</button>
     """, height=60)
+
+    # Encapsulamento da área imprimível dentro de uma div identificada (.printable-area)
+    st.markdown("<div class='printable-area'>", unsafe_allow_html=True)
+    st.markdown("<div class='print-only-header'><h2>Listagem Unificada de Materiais e Insumos</h2></div>", unsafe_allow_html=True)
+    
+    # Renderização final da tabela dedicada à exportação
+    st.table(lista_consolidada_relatorio)
     st.markdown("</div>", unsafe_allow_html=True)
+
+    st.info("💡 **Configuração Recomendada:** Na janela do navegador, marque a opção **'Gráficos de plano de fundo'** se quiser manter o preenchimento cinza no topo da tabela comercial.")
