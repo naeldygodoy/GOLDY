@@ -464,81 +464,27 @@ with col_direita:
     ])
 
     # ------------------ SISTEMA DE IMPRESSÃO VIA VISIBILITY (CORREÇÃO DE PÁGINA EM BRANCO) ------------------
-    st.markdown("""
-        <style>
-        /* Estilos normais da aplicação */
-        .print-only-title {
-            display: none;
-            font-family: sans-serif;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        /* Regras de Impressão via Visibility */
-        @media print {
-            /* 1. Esconde visualmente toda a árvore da aplicação mas mantém os espaços e containers ativos */
-            html, body, .stApp, [data-testid="stAppViewContainer"], 
-            [data-testid="stMain"], [data-testid="stMainSpaceBlockContainer"],
-            [data-testid="column"], [data-testid="stVerticalBlock"] {
-                visibility: hidden !important;
-                background: white !important;
-            }
-            
-            /* 2. Força apenas a div de conteúdo comercial a ficar visível e flutuar para o topo da folha */
-            .printable-content, .printable-content * {
-                visibility: visible !important;
-            }
-            
-            .printable-content {
-                position: absolute !important;
-                left: 0 !important;
-                top: 0 !important;
-                width: 100% !important;
-            }
-            
-            /* 3. Ativa e estiliza o título exclusivo de impressão */
-            .print-only-title {
-                display: block !important;
-                font-family: sans-serif !important;
-                font-size: 20px !important;
-                font-weight: bold !important;
-                text-align: center !important;
-                color: #000 !important;
-                margin-top: 0px !important;
-                margin-bottom: 25px !important;
-            }
-
-            /* 4. Formatação e compactação fina da tabela para folha A4 */
-            .printable-content table {
-                width: 100% !important;
-                font-size: 11px !important;
-                border-collapse: collapse !important;
-            }
-            
-            .printable-content th, .printable-content td {
-                padding: 5px 8px !important;
-                border: 1px solid #333 !important;
-                color: #000 !important;
-            }
-            
-            .printable-content th {
-                background-color: #f2f2f2 !important;
-                font-weight: bold !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
-        </style>
-    """, unsafe_allow_html=True)
+   # ------------------ SISTEMA DE IMPRESSÃO VIA POP-UP CLEAN (SOLUÇÃO DEFINITIVA) ------------------
+    
+    # 1. Geramos o código HTML da tabela purificado para o JavaScript injetar na nova janela
+    html_tabela = "<table style='width:100%; font-size:12px; border-collapse:collapse; font-family:sans-serif;'>"
+    html_tabela += "<thead style='background-color:#f2f2f2; font-weight:bold;'>"
+    html_tabela += "<tr><th style='border:1px solid #333; padding:6px 10px; text-align:left;'>Quantidade</th>"
+    html_tabela += "<th style='border:1px solid #333; padding:6px 10px; text-align:left;'>Descrição do Item</th></tr></thead><tbody>"
+    
+    for row in lista_consolidada_relatorio:
+        html_tabela += f"<tr><td style='border:1px solid #333; padding:5px 10px;'>{row['Quantidade']}</td>"
+        html_tabela += f"<td style='border:1px solid #333; padding:5px 10px;'>{row['Descrição do Item']}</td></tr>"
+    html_tabela += "</tbody></table>"
 
     st.markdown("---")
     st.markdown("### 🖨️ Exportar Orçamento")
-    st.markdown("<div class='print-instruction'><p>Utilize o botão verde abaixo. A nova lógica de isolamento impede telas brancas na pré-visualização e imprime apenas os materiais:</p></div>", unsafe_allow_html=True)
-    
-    # Botão de gatilho de impressão atualizado
-    st.components.v1.html("""
+    st.markdown("Clique no botão abaixo para abrir a listagem purificada direto na tela de impressão do sistema:")
+
+    # 2. Injetamos o componente de script que isola a tabela em uma nova janela temporária e chama o print
+    js_print_script = f"""
         <style>
-        .print-btn {
+        .print-btn {{
             background-color: #28a745;
             color: white !important;
             padding: 14px 28px;
@@ -551,18 +497,39 @@ with col_direita:
             width: 100%;
             font-family: sans-serif;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-        }
-        .print-btn:hover { background-color: #218838; }
+        }}
+        .print-btn:hover {{ background-color: #218838; }}
         </style>
-        <button class="print-btn" onclick="window.parent.print()">🖨️ Imprimir Listagem Unificada</button>
-    """, height=60)
+        
+        <button class="print-btn" onclick="imprimirTabela()">🖨️ Gerar PDF / Imprimir Listagem</button>
 
-    # Encapsulamento da área comercial
-    st.markdown("<div class='printable-content'>", unsafe_allow_html=True)
-    st.markdown("<div class='print-only-title'>Listagem Unificada de Materiais e Insumos</div>", unsafe_allow_html=True)
+        <script>
+        function imprimirTabela() {{
+            // Cria uma nova janela em branco
+            var janelaImpressao = window.open('', '', 'width=900,height=800');
+            
+            // Monta o documento focado estritamente na tabela comercial
+            janelaImpressao.document.write('<html><head><title>Frigelar - Relatório de Materiais</title>');
+            janelaImpressao.document.write('<style>body {{ font-family: sans-serif; margin: 30px; }} h2 {{ text-align: center; margin-bottom: 20px; }}</style>');
+            janelaImpressao.document.write('</head><body>');
+            janelaImpressao.document.write('<h2>Listagem Unificada de Materiais e Insumos</h2>');
+            janelaImpressao.document.write("{html_tabela}");
+            janelaImpressao.document.write('</body></html>');
+            
+            janelaImpressao.document.close();
+            janelaImpressao.focus();
+            
+            // Executa a impressão da nova janela e fecha logo em seguida
+            setTimeout(function() {{
+                janelaImpressao.print();
+                janelaImpressao.close();
+            }}, 500);
+        }}
+        </script>
+    """
     
-    # Renderização da tabela de dados comercial
-    st.table(lista_consolidada_relatorio)
-    st.markdown("</div>", unsafe_allow_html=True)
+    st.components.v1.html(js_print_script, height=70)
 
-    st.info("💡 **Configuração de Layout:** Certifique-se de manter as margens como **'Padrão'** nas configurações da sua impressora para o perfeito ajuste das colunas.")
+    # 3. Mantemos a visualização da tabela normal para o usuário ver na tela do app
+    st.markdown("#### Visualização Prévia da Tabela (Web):")
+    st.table(lista_consolidada_relatorio)
