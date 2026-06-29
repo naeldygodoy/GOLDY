@@ -1,5 +1,8 @@
 import streamlit as st
 import math
+import io
+import pandas as pd
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 
 # Configuração da página web
 st.set_page_config(page_title="Calculadora Frigelar - Câmaras Frias", layout="wide")
@@ -408,7 +411,7 @@ with col_direita:
     lista_consolidada_relatorio.append({"Quantidade": f"{pacotes_rebites} pac(s)", "Descrição do Item": "Rebite pacote 1000pç - Fixação de Perfis"})
     lista_consolidada_relatorio.append({"Quantidade": f"{tubos_selante} tubos", "Descrição do Item": "Selante PU - Vedação de Juntas"})
     lista_consolidada_relatorio.append({"Quantidade": f"{rolos_manta} rolos", "Descrição do Item": "Manta Asfáltica - Proteção Mecânica Piso"})
-    lista_consolidada_relatorio.append({"Quantidade": f"{baldes_hidroasfalto} balde(s)", "Descrição do Item": "Hydroasfalto - Impermeallização"})
+    lista_consolidada_relatorio.append({"Quantidade": f"{baldes_hidroasfalto} balde(s)", "Descrição do Item": "Hydroasfalto - Impermeabilização"})
     lista_consolidada_relatorio.append({"Quantidade": f"{pecas_lona} pçs", "Descrição do Item": "Lona Plástica - Barreira de Vapor"})
     lista_consolidada_relatorio.append({"Quantidade": f"{spray_pu_pcs} pçs", "Descrição do Item": "Poliuretano Spray - Isolamento de Frestas"})
     lista_consolidada_relatorio.append({"Quantidade": f"{luminarias_pcs} pçs", "Descrição do Item": "Luminária tartaruga - Iluminação Interna"})
@@ -441,7 +444,7 @@ with col_direita:
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Visor de Líquido - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Filtro Secador - Integrado de fábrica na UC Danfoss"},
         {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": f"Válvula Solenoide de Líquido - Rosca na bitola {bitola_descarga}\""},
-        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compartível com quadro"},
+        {"Quantidade": f"{qtd_maquinas} pç(s)", "Descrição do Item": "Bobina para Válvula Solenoide - Compatível com quadro"},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Sucção - Bitola {bitola_succao}\""},
         {"Quantidade": f"{(5 * qtd_maquinas)} pçs", "Descrição do Item": f"Curva de Cobre 90° - Descarga - Bitola {bitola_descarga}\""},
         {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Luva de Cobre - Sucção - Bitola " + bitola_succao + "\""},
@@ -463,73 +466,77 @@ with col_direita:
         {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Carga de Gás MAP - Cilindro descartável p/ maçarico"}
     ])
 
-    # ------------------ SISTEMA DE IMPRESSÃO VIA VISIBILITY (CORREÇÃO DE PÁGINA EM BRANCO) ------------------
-   # ------------------ SISTEMA DE IMPRESSÃO VIA POP-UP CLEAN (SOLUÇÃO DEFINITIVA) ------------------
-    
-    # 1. Geramos o código HTML da tabela purificado para o JavaScript injetar na nova janela
-    html_tabela = "<table style='width:100%; font-size:12px; border-collapse:collapse; font-family:sans-serif;'>"
-    html_tabela += "<thead style='background-color:#f2f2f2; font-weight:bold;'>"
-    html_tabela += "<tr><th style='border:1px solid #333; padding:6px 10px; text-align:left;'>Quantidade</th>"
-    html_tabela += "<th style='border:1px solid #333; padding:6px 10px; text-align:left;'>Descrição do Item</th></tr></thead><tbody>"
-    
-    for row in lista_consolidada_relatorio:
-        html_tabela += f"<tr><td style='border:1px solid #333; padding:5px 10px;'>{row['Quantidade']}</td>"
-        html_tabela += f"<td style='border:1px solid #333; padding:5px 10px;'>{row['Descrição do Item']}</td></tr>"
-    html_tabela += "</tbody></table>"
-
+    # ================= SISTEMA DE EXPORTAÇÃO (DOWNLOAD NATIVO) =================
     st.markdown("---")
-    st.markdown("### 🖨️ Exportar Orçamento")
-    st.markdown("Clique no botão abaixo para abrir a listagem purificada direto na tela de impressão do sistema:")
+    st.markdown("### 📄 Exportar Listagem de Materiais")
+    st.markdown("Como as diretrizes de segurança de navegadores bloqueiam pop-ups gerados de iframes, a solução oficial para extrair relatórios limpos é o download nativo em Excel corporativo:")
 
-    # 2. Injetamos o componente de script que isola a tabela em uma nova janela temporária e chama o print
-    js_print_script = f"""
-        <style>
-        .print-btn {{
-            background-color: #28a745;
-            color: white !important;
-            padding: 14px 28px;
-            text-align: center;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 6px;
-            border: none;
-            font-weight: bold;
-            width: 100%;
-            font-family: sans-serif;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-        }}
-        .print-btn:hover {{ background-color: #218838; }}
-        </style>
+    # 1. Criar o DataFrame com os dados da tabela
+    df_export = pd.DataFrame(lista_consolidada_relatorio)
+
+    # 2. Gerar o arquivo Excel em memória utilizando openpyxl para aplicar estilo profissional
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+        df_export.to_excel(writer, index=False, sheet_name='Orçamento de Materiais')
         
-        <button class="print-btn" onclick="imprimirTabela()">🖨️ Gerar PDF / Imprimir Listagem</button>
+        workbook = writer.book
+        worksheet = writer.sheets['Orçamento de Materiais']
+        
+        # Definição de cores (Estilo Corporativo Frigelar - Azul Escuro/Cinza)
+        header_fill = PatternFill(start_color="1B365D", end_color="1B365D", fill_type="solid")
+        header_font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")
+        row_font = Font(name="Calibri", size=11, color="000000")
+        zebra_fill = PatternFill(start_color="F2F4F8", end_color="F2F4F8", fill_type="solid")
+        
+        thin_border = Border(
+            left=Side(style='thin', color='D3D3D3'),
+            right=Side(style='thin', color='D3D3D3'),
+            top=Side(style='thin', color='D3D3D3'),
+            bottom=Side(style='thin', color='D3D3D3')
+        )
+        
+        # Ajustar tamanho das colunas e aplicar estilos
+        worksheet.column_dimensions['A'].width = 20  # Coluna Quantidade
+        worksheet.column_dimensions['B'].width = 85  # Coluna Descrição
+        
+        # Formatar Cabeçalho (Linha 1)
+        for col_idx in range(1, 3):
+            cell = worksheet.cell(row=1, column=col_idx)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal="left" if col_idx == 2 else "center", vertical="center")
+            cell.border = thin_border
+            
+        # Formatar Linhas de Dados
+        for row_idx in range(2, len(lista_consolidada_relatorio) + 2):
+            # Aplicar efeito zebra alternado nas linhas
+            current_fill = zebra_fill if row_idx % 2 == 0 else PatternFill(fill_type=None)
+            
+            cell_qtd = worksheet.cell(row=row_idx, column=1)
+            cell_desc = worksheet.cell(row=row_idx, column=2)
+            
+            for cell in [cell_qtd, cell_desc]:
+                cell.font = row_font
+                if current_fill.fill_type: 
+                    cell.fill = current_fill
+                cell.border = thin_border
+                
+            cell_qtd.alignment = Alignment(horizontal="center", vertical="center")
+            cell_desc.alignment = Alignment(horizontal="left", vertical="center")
+            
+        # Altura das linhas para dar respiro ao documento
+        worksheet.row_dimensions[1].height = 28
+        for r in range(2, row_idx + 1):
+            worksheet.row_dimensions[r].height = 20
 
-        <script>
-        function imprimirTabela() {{
-            // Cria uma nova janela em branco
-            var janelaImpressao = window.open('', '', 'width=900,height=800');
-            
-            // Monta o documento focado estritamente na tabela comercial
-            janelaImpressao.document.write('<html><head><title>Frigelar - Relatório de Materiais</title>');
-            janelaImpressao.document.write('<style>body {{ font-family: sans-serif; margin: 30px; }} h2 {{ text-align: center; margin-bottom: 20px; }}</style>');
-            janelaImpressao.document.write('</head><body>');
-            janelaImpressao.document.write('<h2>Listagem Unificada de Materiais e Insumos</h2>');
-            janelaImpressao.document.write("{html_tabela}");
-            janelaImpressao.document.write('</body></html>');
-            
-            janelaImpressao.document.close();
-            janelaImpressao.focus();
-            
-            // Executa a impressão da nova janela e fecha logo em seguida
-            setTimeout(function() {{
-                janelaImpressao.print();
-                janelaImpressao.close();
-            }}, 500);
-        }}
-        </script>
-    """
-    
-    st.components.v1.html(js_print_script, height=70)
+    # 3. Criar o botão de download nativo do Streamlit (Impossível de ser bloqueado)
+    st.download_button(
+        label="🟢 Descarregar Listagem em Excel (.xlsx)",
+        data=buffer.getvalue(),
+        file_name="Listagem_Materiais_Camara_Fria.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
 
-    # 3. Mantemos a visualização da tabela normal para o usuário ver na tela do app
-    st.markdown("#### Visualização Prévia da Tabela (Web):")
+    # 4. Manter a tabela visível na interface web para consulta rápida
+    st.markdown("#### Visualização Prévia da Listagem:")
     st.table(lista_consolidada_relatorio)
