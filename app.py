@@ -158,7 +158,7 @@ trilho_inox_pcs = math.ceil(larg_p)
 suporte_trilho_pcs = trilho_inox_pcs * 6
 
 altura_tira = alt_p + 0.10
-metragem_total_cortina = soporte_trilho_pcs * altura_tira
+metragem_total_cortina = suporte_trilho_pcs * altura_tira  #  Muda para 'suporte'
 metragem_comercial_cortina = math.ceil(metragem_total_cortina / 10.0) * 10
 
 if espessura_cm in [7, 10]:
