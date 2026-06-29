@@ -507,3 +507,71 @@ with col_direita:
     """, height=60)
 
     st.info("💡 **Dica da Frigelar:** Escolha a opção **'Salvar como PDF'** nas configurações da sua impressora para gerar o arquivo digital comercial.")
+
+    # ------------------ SISTEMA DE IMPRESSÃO REVISADO (APENAS TABELA) ------------------
+    st.markdown("---")
+    st.markdown("### 🖨️ Exportar Orçamento")
+
+    # Injeção de CSS que esconde TUDO na impressão, exceto a tabela e o bloco de informações técnicas
+    st.markdown("""
+        <style>
+        @media print {
+            /* Esconde a barra lateral, cabeçalhos, rodapés e decorações do Streamlit */
+            div[data-testid="stSidebar"], 
+            div[data-testid="stHeader"], 
+            footer, 
+            header,
+            .stButton,
+            div.print-instruction { 
+                display: none !important; 
+            }
+            
+            /* Esconde a coluna da esquerda (formulário de dados) inteira */
+            div[data-testid="column"]:nth-of-type(1) {
+                display: none !important;
+            }
+            
+            /* Força a coluna da direita (resultados) a ocupar 100% da largura do papel */
+            div[data-testid="column"]:nth-of-type(2) {
+                width: 100% !important;
+                flex: 1 1 100% !important;
+                max-width: 100% !important;
+            }
+            
+            /* Ajusta margens do papel para impressão limpa */
+            .main .block-container { 
+                padding: 0rem !important; 
+                max-width: 100% !important; 
+            }
+            
+            /* Oculta o próprio componente do botão para ele não sair impresso */
+            iframe { 
+                display: none !important; 
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<div class='print-instruction'><p>Clique abaixo para gerar o relatório em formato de tabela pura (ideal para salvar em PDF e enviar por WhatsApp):</p></div>", unsafe_allow_html=True)
+    
+    # Gerador do botão que aciona a janela de impressão nativa
+    st.components.v1.html("""
+        <style>
+        .print-btn {
+            background-color: #ff4b4b;
+            color: white !important;
+            padding: 12px 24px;
+            text-align: center;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            width: 100%;
+            font-family: sans-serif;
+            box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
+        }
+        .print-btn:hover { background-color: #ff3333; }
+        </style>
+        <button class="print-btn" onclick="window.parent.print()">🖨️ Gerar Tabela para Impressão / PDF</button>
+    """, height=60)
