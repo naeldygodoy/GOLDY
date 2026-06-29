@@ -660,3 +660,64 @@ with col_direita:
     st.info("""
     💡 **Dica de Impressão:** Na janela que se abrir, você pode escolher o destino como **"Salvar como PDF"** para gerar um arquivo digital limpo e direto para enviar no WhatsApp do seu cliente.
     """)
+
+    # ------------------ SISTEMA DE IMPRESSÃO CORRIGIDO ------------------
+    st.markdown("### 🖨️ Exportar Orçamento")
+
+    # Injeção de CSS para ocultar elementos desnecessários na folha de impressão
+    st.markdown("""
+        <style>
+        @media print {
+            div[data-testid="stSidebar"] {
+                display: none !important;
+            }
+            div[data-testid="stHeader"] {
+                display: none !important;
+            }
+            .stButton, .print-button-container {
+                display: none !important;
+            }
+            header {
+                visibility: hidden !important;
+            }
+            .main .block-container {
+                padding-top: 1rem !important;
+                max-width: 100% !important;
+            }
+        }
+        /* Estilização para o nosso botão HTML parecer um botão oficial do Streamlit */
+        .print-btn {
+            background-color: #ff4b4b;
+            color: white !important;
+            padding: 10px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            border: none;
+            font-weight: bold;
+            width: 100%;
+        }
+        .print-btn:hover {
+            background-color: #ff3333;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+        <p style='margin-bottom: 15px;'>Clique no botão abaixo para gerar a visualização de impressão ou salvar direto em PDF:</p>
+    """, unsafe_allow_html=True)
+    
+    # Criamos o botão diretamente em HTML/JS usando st.components.v1.html ou markdown direto com ação segura
+    st.markdown("""
+        <div class="print-button-container">
+            <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar Relatório como PDF</button>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.info("""
+    💡 **Dica de Impressão:** Na janela que se abrir, escolha o destino como **"Salvar como PDF"** para gerar o arquivo digital perfeito para enviar no WhatsApp.
+    """)
