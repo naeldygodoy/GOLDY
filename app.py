@@ -376,6 +376,8 @@ qtd_porca_58 = (2 * qtd_maquinas) + (1 * qtd_maquinas)
 
 # ================= EXIBIÇÃO DOS RESULTADOS =================
 with col_direita:
+    # Divisor HTML adicionado para demarcar o início estrito da impressão comercial
+    st.markdown("<div class='no-print'>", unsafe_allow_html=True)
     st.header("2. Relatório Técnico de Materiais")
     
     st.info(f"""
@@ -384,10 +386,10 @@ with col_direita:
     ⚡ **Carga Térmica de Projeto (Ambiente Ext: 43°C):** {carga_termica_estimada:.0f} Kcal/h  
     ⚖️ **Previsão de Estocagem:** {texto_estocagem}
     """)
-    
     st.markdown("---")
+    st.markdown("</div>", unsafe_allow_html=True)
     
-    # ------------------ CONSOLIDAÇÃO DOS DADOS (TABELA COMERCIAL) ------------------
+    # ------------------ CONSOLIDAÇÃO DOS DADOS ------------------
     lista_consolidada_relatorio = []
     
     lista_consolidada_relatorio.append({"Quantidade": f"{total_paineis_parede} pçs", "Descrição do Item": f"Painéis de Parede - Espessura {espessura_teto:.2f}m | Altura {alt_painel:.2f}m"})
@@ -466,38 +468,44 @@ with col_direita:
     st.markdown("### 📊 Listagem Unificada de Materiais e Insumos")
     st.table(lista_consolidada_relatorio)
 
-    # ------------------ SISTEMA DE IMPRESSÃO REVISADO (APENAS TABELA) ------------------
-    st.markdown("---")
+    # ------------------ SISTEMA DE IMPRESSÃO CIRÚRGICO (APENAS LISTAGEM) ------------------
+    st.markdown("<div class='no-print'>---", unsafe_allow_html=True)
     st.markdown("### 🖨️ Exportar Orçamento")
 
-    # Injeção de CSS para ocultar formulário e elementos desnecessários na impressão
+    # Injeção de CSS focada estritamente em ocultar as colunas técnicas e manter apenas o título da listagem e a tabela de dados comerciais
     st.markdown("""
         <style>
         @media print {
+            /* Ocultar barra lateral, cabeçalho do Streamlit e o rodapé padrão */
             div[data-testid="stSidebar"], 
             div[data-testid="stHeader"], 
             footer, 
             header,
             .stButton,
+            .no-print,
             div.print-instruction { 
                 display: none !important; 
             }
             
+            /* Ocultar totalmente a coluna de inserção de dados da esquerda */
             div[data-testid="column"]:nth-of-type(1) {
                 display: none !important;
             }
             
+            /* Forçar a coluna do relatório comercial da direita a assumir 100% da largura da folha A4 */
             div[data-testid="column"]:nth-of-type(2) {
                 width: 100% !important;
                 flex: 1 1 100% !important;
                 max-width: 100% !important;
             }
             
+            /* Ajustar as margens do corpo para aproveitar os cantos da folha */
             .main .block-container { 
-                padding: 0rem !important; 
+                padding: 0.5rem !important; 
                 max-width: 100% !important; 
             }
             
+            /* Remove os blocos do botão html e iframes residuais */
             iframe { 
                 display: none !important; 
             }
@@ -505,13 +513,12 @@ with col_direita:
         </style>
     """, unsafe_allow_html=True)
 
-    st.markdown("<div class='print-instruction'><p>Clique abaixo para gerar o relatório em formato de tabela pura (ideal para salvar em PDF e enviar por WhatsApp):</p></div>", unsafe_allow_html=True)
+    st.markdown("<div class='print-instruction'><p>Gere o PDF com foco estrito apenas na listagem e tabela:</p></div>", unsafe_allow_html=True)
     
-    # Gerador do botão de impressão que burla o iframe chamando o window.parent
     st.components.v1.html("""
         <style>
         .print-btn {
-            background-color: #ff4b4b;
+            background-color: #007bff;
             color: white !important;
             padding: 12px 24px;
             text-align: center;
@@ -524,9 +531,8 @@ with col_direita:
             font-family: sans-serif;
             box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
         }
-        .print-btn:hover { background-color: #ff3333; }
+        .print-btn:hover { background-color: #0056b3; }
         </style>
-        <button class="print-btn" onclick="window.parent.print()">🖨️ Gerar Tabela para Impressão / PDF</button>
+        <button class="print-btn" onclick="window.parent.print()">🖨️ Imprimir Apenas Listagem de Insumos</button>
     """, height=60)
-
-    st.info("💡 **Dica da Frigelar:** Escolha a opção **'Salvar como PDF'** nas configurações da sua impressora para gerar o arquivo digital comercial.")
+    st.markdown("</div>", unsafe_allow_html=True)
