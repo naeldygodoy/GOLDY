@@ -408,7 +408,7 @@ with col_direita:
     lista_consolidada_relatorio.append({"Quantidade": f"{pacotes_rebites} pac(s)", "Descrição do Item": "Rebite pacote 1000pç - Fixação de Perfis"})
     lista_consolidada_relatorio.append({"Quantidade": f"{tubos_selante} tubos", "Descrição do Item": "Selante PU - Vedação de Juntas"})
     lista_consolidada_relatorio.append({"Quantidade": f"{rolos_manta} rolos", "Descrição do Item": "Manta Asfáltica - Proteção Mecânica Piso"})
-    lista_consolidada_relatorio.append({"Quantidade": f"{baldes_hidroasfalto} balde(s)", "Descrição do Item": "Hydroasfalto - Impermeabilização"})
+    lista_consolidada_relatorio.append({"Quantidade": f"{baldes_hidroasfalto} balde(s)", "Descrição do Item": "Hydroasfalto - Impermeallização"})
     lista_consolidada_relatorio.append({"Quantidade": f"{pecas_lona} pçs", "Descrição do Item": "Lona Plástica - Barreira de Vapor"})
     lista_consolidada_relatorio.append({"Quantidade": f"{spray_pu_pcs} pçs", "Descrição do Item": "Poliuretano Spray - Isolamento de Frestas"})
     lista_consolidada_relatorio.append({"Quantidade": f"{luminarias_pcs} pçs", "Descrição do Item": "Luminária tartaruga - Iluminação Interna"})
@@ -463,69 +463,65 @@ with col_direita:
         {"Quantidade": f"{(3 * qtd_maquinas)} pçs", "Descrição do Item": "Carga de Gás MAP - Cilindro descartável p/ maçarico"}
     ])
 
-    # ------------------ SISTEMA DE IMPRESSÃO INFALÍVEL (MÁXIMA ISOLAÇÃO) ------------------
+    # ------------------ SISTEMA DE IMPRESSÃO VIA VISIBILITY (CORREÇÃO DE PÁGINA EM BRANCO) ------------------
     st.markdown("""
         <style>
         /* Estilos normais da aplicação */
-        .print-only-header {
+        .print-only-title {
             display: none;
             font-family: sans-serif;
             text-align: center;
             margin-bottom: 20px;
         }
         
-        /* Regras de Impressão Absolutas */
+        /* Regras de Impressão via Visibility */
         @media print {
-            /* Ocultar absolutamente toda a raiz estrutural padrão do Streamlit */
+            /* 1. Esconde visualmente toda a árvore da aplicação mas mantém os espaços e containers ativos */
             html, body, .stApp, [data-testid="stAppViewContainer"], 
             [data-testid="stMain"], [data-testid="stMainSpaceBlockContainer"],
-            [data-testid="stSidebar"], [data-testid="stHeader"], footer, header,
-            .stButton, .stInfo, div.print-instruction, hr {
-                display: none !important;
-                background: transparent !important;
+            [data-testid="column"], [data-testid="stVerticalBlock"] {
+                visibility: hidden !important;
+                background: white !important;
             }
             
-            /* Selecionar e isolar apenas o container que envelopa a tabela de impressão */
-            .printable-area {
-                display: block !important;
+            /* 2. Força apenas a div de conteúdo comercial a ficar visível e flutuar para o topo da folha */
+            .printable-content, .printable-content * {
+                visibility: visible !important;
+            }
+            
+            .printable-content {
                 position: absolute !important;
                 left: 0 !important;
                 top: 0 !important;
                 width: 100% !important;
-                z-index: 9999999 !important;
-                background: white !important;
-                padding: 0cm !important;
             }
             
-            /* Garantir que o cabeçalho de impressão seja exibido */
-            .print-only-header {
+            /* 3. Ativa e estiliza o título exclusivo de impressão */
+            .print-only-title {
                 display: block !important;
-                margin-bottom: 25px !important;
-            }
-            
-            .print-only-header h2 {
-                display: block !important;
-                font-size: 22px !important;
-                color: #000 !important;
+                font-family: sans-serif !important;
+                font-size: 20px !important;
                 font-weight: bold !important;
                 text-align: center !important;
+                color: #000 !important;
+                margin-top: 0px !important;
+                margin-bottom: 25px !important;
             }
 
-            /* Forçar a tabela html interna a ocupar 100% da largura útil da página A4 */
-            .printable-area table {
+            /* 4. Formatação e compactação fina da tabela para folha A4 */
+            .printable-content table {
                 width: 100% !important;
                 font-size: 11px !important;
                 border-collapse: collapse !important;
-                background: white !important;
             }
             
-            .printable-area th, .printable-area td {
+            .printable-content th, .printable-content td {
                 padding: 5px 8px !important;
                 border: 1px solid #333 !important;
                 color: #000 !important;
             }
             
-            .printable-area th {
+            .printable-content th {
                 background-color: #f2f2f2 !important;
                 font-weight: bold !important;
                 -webkit-print-color-adjust: exact !important;
@@ -537,9 +533,9 @@ with col_direita:
 
     st.markdown("---")
     st.markdown("### 🖨️ Exportar Orçamento")
-    st.markdown("<div class='print-instruction'><p>Clique no botão abaixo. O sistema agora isola estritamente a listagem para garantir que os campos de entrada e textos explicativos fiquem de fora do papel/PDF:</p></div>", unsafe_allow_html=True)
+    st.markdown("<div class='print-instruction'><p>Utilize o botão verde abaixo. A nova lógica de isolamento impede telas brancas na pré-visualização e imprime apenas os materiais:</p></div>", unsafe_allow_html=True)
     
-    # Botão de gatilho com JavaScript atualizado
+    # Botão de gatilho de impressão atualizado
     st.components.v1.html("""
         <style>
         .print-btn {
@@ -558,15 +554,15 @@ with col_direita:
         }
         .print-btn:hover { background-color: #218838; }
         </style>
-        <button class="print-btn" onclick="window.parent.print()">🖨️ Gerar Listagem Unificada Ajustada</button>
+        <button class="print-btn" onclick="window.parent.print()">🖨️ Imprimir Listagem Unificada</button>
     """, height=60)
 
-    # Encapsulamento da área imprimível dentro de uma div identificada (.printable-area)
-    st.markdown("<div class='printable-area'>", unsafe_allow_html=True)
-    st.markdown("<div class='print-only-header'><h2>Listagem Unificada de Materiais e Insumos</h2></div>", unsafe_allow_html=True)
+    # Encapsulamento da área comercial
+    st.markdown("<div class='printable-content'>", unsafe_allow_html=True)
+    st.markdown("<div class='print-only-title'>Listagem Unificada de Materiais e Insumos</div>", unsafe_allow_html=True)
     
-    # Renderização final da tabela dedicada à exportação
+    # Renderização da tabela de dados comercial
     st.table(lista_consolidada_relatorio)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.info("💡 **Configuração Recomendada:** Na janela do navegador, marque a opção **'Gráficos de plano de fundo'** se quiser manter o preenchimento cinza no topo da tabela comercial.")
+    st.info("💡 **Configuração de Layout:** Certifique-se de manter as margens como **'Padrão'** nas configurações da sua impressora para o perfeito ajuste das colunas.")
