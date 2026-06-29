@@ -521,3 +521,142 @@ with col_direita:
     st.info("""
     💡 **INFORMAÇÃO IMPORTANTE:** Os dados e quantitativos apresentados neste relatório foram consolidados com base na análise técnica dos parâmetros fornecidos pelo cliente, o qual é inteiramente responsável pela exatidão das dimensões e especificações de entrada do projeto.
     """)
+
+    # ================= EXIBIÇÃO DOS RESULTADOS =================
+with col_direita:
+    # ------------------ 2. RELATÓRIO TÉCNICO DE MATERIAIS ------------------
+    st.header("2. Relatório Técnico de Materiais")
+    
+    st.info(f"""
+    📐 **Dimensões Internas Úteis:** {comp_int:.2f}m (C) x {larg_int:.2f}m (L) x {alt_int:.2f}m (A)  
+    📦 **Volume Interno Útil:** {volume_interno:.2f} m³  
+    ⚡ **Carga Térmica de Projeto (Ambiente Ext: 43°C):** {carga_termica_estimada:.0f} Kcal/h  
+    ⚖️ **Previsão de Estocagem:** {texto_estocagem}
+    """)
+    
+    st.markdown("---")
+    
+    # ------------------ CONSOLIDAÇÃO DOS DADOS PARA O RELATÓRIO ÚNICO ------------------
+    # Aqui unificamos todos os itens gerados em uma única lista sem categorização
+    lista_consolidada_relatorio = []
+    
+    # 1. Painéis e Portas
+    lista_consolidada_relatorio.append({"Item / Componente": "Painéis de Parede", "Quantidade": f"{total_paineis_parede} pçs", "Especificação / Detalhe": f"Espessura {espessura_teto:.2f}m | Altura {alt_painel:.2f}m"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Painéis de Teto", "Quantidade": f"{total_paineis_teto} pçs", "Especificação / Detalhe": f"Comprimento {comprimento_painel_teto:.2f}m"})
+    if chapas_5cm > 0:
+        lista_consolidada_relatorio.append({"Item / Componente": "Chapas de piso (EPS 5cm)", "Quantidade": f"{chapas_5cm} pçs", "Especificação / Detalhe": "Isolamento de Piso"})
+    if chapas_10cm > 0:
+        lista_consolidada_relatorio.append({"Item / Componente": "Chapas de piso (EPS 10cm)", "Quantidade": f"{chapas_10cm} pçs", "Especificação / Detalhe": "Isolamento de Piso"})
+    lista_consolidada_relatorio.append({"Item / Componente": f"Porta Frigorífica {tamanho_porta}", "Quantidade": "1 pç", "Especificação / Detalhe": f"Modelo {detalhe_porta} | {resistencia_porta}"})
+    
+    # 2. Acessórios de Isolamento
+    lista_consolidada_relatorio.append({"Item / Componente": "Trilho Inox", "Quantidade": f"{trilho_inox_pcs} pç", "Especificação / Detalhe": "Acessório Porta"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Suporte de Trilho", "Quantidade": f"{suporte_trilho_pcs} pçs", "Especificação / Detalhe": "Acessório Porta"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Cortina Plástica Polar", "Quantidade": f"{metragem_comercial_cortina} m", "Especificação / Detalhe": "Proteção Térmica"})
+    lista_consolidada_relatorio.append({"Item / Componente": f"Cantoneira Externa {modelo_cantoneira}", "Quantidade": f"{barras_cantoneira_ext} barras", "Especificação / Detalhe": "Acabamento Externo"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Cantoneira Interna 40 x 40", "Quantidade": f"{barras_cantoneira_int} barras", "Especificação / Detalhe": "Acabamento Interno"})
+    lista_consolidada_relatorio.append({"Item / Componente": f"Perfil U 40 x {espessura_mm} x 40", "Quantidade": f"{barras_perfil_u} barras", "Especificação / Detalhe": "Perfil de Piso/Painel"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Rebite pacote 1000pç", "Quantidade": f"{pacotes_rebites} pac(s)", "Especificação / Detalhe": "Fixação de Perfis"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Selante PU", "Quantidade": f"{tubos_selante} tubos", "Especificação / Detalhe": "Vedação de Juntas"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Manta Asfáltica", "Quantidade": f"{rolos_manta} rolos", "Especificação / Detalhe": "Proteção Mecânica Piso"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Hydroasfalto", "Quantidade": f"{baldes_hidroasfalto} balde(s)", "Especificação / Detalhe": "Impermeabilização"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Lona Plástica", "Quantidade": f"{pecas_lona} pçs", "Especificação / Detalhe": "Barreira de Vapor"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Poliuretano Spray", "Quantidade": f"{spray_pu_pcs} pçs", "Especificação / Detalhe": "Isolamento de Frestas"})
+    lista_consolidada_relatorio.append({"Item / Componente": "Luminária tartaruga", "Quantidade": f"{luminarias_pcs} pçs", "Especificação / Detalhe": "Iluminação Interna"})
+    if barras_de_6m > 0:
+        lista_consolidada_relatorio.append({"Item / Componente": "Kit sustentação de teto 6m", "Quantidade": f"{barras_de_6m} barras", "Especificação / Detalhe": "Perfil T Sustentação"})
+    if barras_de_3m > 0:
+        lista_consolidada_relatorio.append({"Item / Componente": "Kit sustentação de teto 3m", "Quantidade": f"{barras_de_3m} barras", "Especificação / Detalhe": "Perfil T Sustentação"})
+    if qtd_valvulas > 0:
+        lista_consolidada_relatorio.append({"Item / Componente": "Válvula de compensação", "Quantidade": f"{qtd_valvulas} pçs", "Especificação / Detalhe": "Alívio de Pressão"})
+        
+    # 3. Equipamentos Principais
+    lista_consolidada_relatorio.append({"Item / Componente": "Unidade Condensadora Danfoss", "Quantidade": f"{qtd_maquinas} x {modelo_condensadora}", "Especificação / Detalhe": f"Rendimento Ind: {kcal_unitario_cond} Kcal/h | Fluido: {tipo_gas}"})
+    lista_consolidada_relatorio.append({"Item / Componente": f"Evaporador Mipal", "Quantidade": f"{qtd_maquinas} x {modelo_evaporador}", "Especificação / Detalhe": f"Rendimento Ind: {kcal_unitario_evap} Kcal/h"})
+
+    # 4. Acessórios Mecânicos
+    valv_exp_modelo = "TEX2 (Danfoss)" if tipo_gas == "R22" else "TES2 (Danfoss)"
+    tubo_elastom_espessura = "19mm" if "Resfriados" in temp_desejada else "25mm"
+    oleo_sugerido = "160P (Mineral)" if tipo_gas == "R22" else "160PZ (POE)"
+
+    lista_consolidada_relatorio.extend([
+        {"Item / Componente": "Resistências de Degelo", "Quantidade": f"{qtd_maquinas} Kit(s)", "Especificação / Detalhe": "Kit original p/ evaporador"},
+        {"Item / Componente": "Válvula de Expansão Termostática", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": f"Modelo {valv_exp_modelo}"},
+        {"Item / Componente": "Orifício de Expansão", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Orifício técnico calibrado (0 a 6)"},
+        {"Item / Componente": "Porca Flare 1/4\"", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Conexão de equalização"},
+        {"Item / Componente": "Porca Flare 3/8\"", "Quantidade": f"{qtd_porca_38} pç(s)", "Especificação / Detalhe": "Linha de líquido / Válvula"},
+        {"Item / Componente": "Porca Flare 1/2\"", "Quantidade": f"{qtd_porca_12} pç(s)", "Especificação / Detalhe": "Linha de descarga / Válvula"},
+        {"Item / Componente": "Porca Flare 5/8\"", "Quantidade": f"{qtd_porca_58} pç(s)", "Especificação / Detalhe": "Conexões unificadas"},
+        {"Item / Componente": "Cobre Tubo Sucção (Isolado)", "Quantidade": f"{(15 * qtd_maquinas)} m", "Especificação / Detalhe": f"Bitola de {bitola_succao}\""},
+        {"Item / Componente": "Cobre Tubo Descarga / Líquido", "Quantidade": f"{(15 * qtd_maquinas)} m", "Especificação / Detalhe": f"Bitola de {bitola_descarga}\""},
+        {"Item / Componente": "Tubo Isolante Elastomérico", "Quantidade": f"{(8 * qtd_maquinas * 2)} m", "Especificação / Detalhe": f"Parede {tubo_elastom_espessura} | Bitola {bitola_succao}\""},
+        {"Item / Componente": "Visor de Líquido", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Integrado de fábrica na UC Danfoss"},
+        {"Item / Componente": "Filtro Secador", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Integrado de fábrica na UC Danfoss"},
+        {"Item / Componente": "Válvula Solenoide de Líquido", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": f"Rosca na bitola {bitola_descarga}\""},
+        {"Item / Componente": "Bobina para Válvula Solenoide", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Compatível com quadro"},
+        {"Item / Componente": "Curva de Cobre 90° - Sucção", "Quantidade": f"{(5 * qtd_maquinas)} pçs", "Especificação / Detalhe": f"Bitola {bitola_succao}\""},
+        {"Item / Componente": "Curva de Cobre 90° - Descarga", "Quantidade": f"{(5 * qtd_maquinas)} pçs", "Especificação / Detalhe": f"Bitola {bitola_descarga}\""},
+        {"Item / Componente": "Luva de Cobre - Sucção", "Quantidade": f"{(3 * qtd_maquinas)} pçs", "Especificação / Detalhe": f"Bitola {bitola_succao}\""},
+        {"Item / Componente": "Luva de Cobre - Descarga", "Quantidade": f"{(3 * qtd_maquinas)} pçs", "Especificação / Detalhe": f"Bitola {bitola_descarga}\""},
+        {"Item / Componente": "Sifão de Cobre", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": f"Saída do Evaporador | Bitola {bitola_succao}\""},
+        {"Item / Componente": "Fita Plástica PVC (Branca)", "Quantidade": f"{(10 * qtd_maquinas)} rolos", "Especificação / Detalhe": "Proteção do isolamento"},
+        {"Item / Componente": "Quadro de Comando Elétrico", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Controlador digital integrado"},
+        {"Item / Componente": "Calço Amortecedor de Borracha", "Quantidade": f"{(4 * qtd_maquinas)} pçs", "Especificação / Detalhe": "Pés da condensadora"},
+        {"Item / Componente": "Suporte Metálico Condensadora", "Quantidade": f"{qtd_maquinas} pç(s)", "Especificação / Detalhe": "Fixação robusta em perfil U"},
+        {"Item / Componente": "Canaleta de Acabamento", "Quantidade": f"{(2 * qtd_maquinas)} pçs", "Especificação / Detalhe": "Proteção física de fiação"},
+        {"Item / Componente": "Cabo Elétrico PP - Ventiladores", "Quantidade": f"{(25 * qtd_maquinas)} m", "Especificação / Detalhe": "Cabo PP 4 x 1.5 mm²"},
+        {"Item / Componente": "Cabo Elétrico PP - Resistências", "Quantidade": f"{(25 * qtd_maquinas)} m", "Especificação / Detalhe": "Cabo PP 4 x 2.5 mm²"},
+        {"Item / Componente": "Cabo Elétrico PP - Força Geral", "Quantidade": f"{(25 * qtd_maquinas)} m", "Especificação / Detalhe": "Cabo PP 4 x 4.0 mm²"},
+        {"Item / Componente": "Cabo Elétrico PP - Iluminação", "Quantidade": f"{(25 * qtd_maquinas)} m", "Especificação / Detalhe": "Cabo PP 2 x 1.5 mm²"},
+        {"Item / Componente": "Gás / Fluido Refrigerante", "Quantidade": f"{qtd_maquinas} cil", "Especificação / Detalhe": f"Carga original {tipo_gas}"},
+        {"Item / Componente": "Óleo Lubrificante Frigorífico", "Quantidade": f"{qtd_maquinas} L", "Especificação / Detalhe": f"Tipo {oleo_sugerido}"},
+        {"Item / Componente": "Solda Foscoper / Prata", "Quantidade": f"{(0.5 * qtd_maquinas):.1f} Kg", "Especificação / Detalhe": "Varetas para brasagem"},
+        {"Item / Componente": "Fluxo para Solda", "Quantidade": "1 pote", "Especificação / Detalhe": "Decapante químico"},
+        {"Item / Componente": "Carga de Gás MAP", "Quantidade": f"{(3 * qtd_maquinas)} pçs", "Especificação / Detalhe": "Cilindro descartável p/ maçarico"}
+    ])
+
+    # ------------------ EXIBIÇÃO DA TABELA CONSOLIDADA EM TELA ------------------
+    st.markdown("### 📊 Listagem Unificada de Materiais e Insumos")
+    st.table(lista_consolidada_relatorio)
+
+    st.markdown("---")
+
+    # ------------------ SISTEMA DE IMPRESSÃO PROFISSIONAL ------------------
+    st.markdown("### 🖨️ Exportar Orçamento")
+
+    # Injeção de CSS para ocultar elementos desnecessários na folha de impressão (como o menu lateral e o próprio botão)
+    st.markdown("""
+        <style>
+        @media print {
+            div[data-testid="stSidebar"] {
+                display: none !important;
+            }
+            div.stButton {
+                display: none !important;
+            }
+            header {
+                visibility: hidden !important;
+            }
+            .main .block-container {
+                padding-top: 1rem !important;
+                max-width: 100% !important;
+            }
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Botão HTML/JavaScript nativo para acionar o comando de impressão do navegador
+    st.markdown("""
+        <p style='margin-bottom: 5px;'>Clique no botão abaixo para gerar a visualização de impressão ou salvar direto em PDF:</p>
+    """, unsafe_allow_html=True)
+    
+    if st.button("🖨️ Imprimir / Salvar Relatório como PDF"):
+        st.markdown("""
+            <script>
+                window.print();
+            </script>
+        """, unsafe_allow_html=True)
+
+    st.info("""
+    💡 **Dica de Impressão:** Na janela que se abrir, você pode escolher o destino como **"Salvar como PDF"** para gerar um arquivo digital limpo e direto para enviar no WhatsApp do seu cliente.
+    """)
